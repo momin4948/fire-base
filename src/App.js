@@ -13,26 +13,7 @@ function App() {
     email: "",
   });
   const provider = new firebase.auth.GoogleAuthProvider();
-
-  const handleSignOut = () => {
-    firebase
-      .auth()
-      .signOut()
-      .then((res) => {
-        const signedOutUser = {
-          isSignedIn: false,
-          name: "",
-          photoURL: "",
-          email: "",
-        };
-        setUser(signedOutUser);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-  //SignIn
-
+  //Sign In//
   const handleSignIn = () => {
     firebase
       .auth()
@@ -54,6 +35,39 @@ function App() {
         console.log(err.message);
       });
   };
+  //Sign In//
+  //Sign Out//
+  const handleSignOut = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then((res) => {
+        const signedOutUser = {
+          isSignedIn: false,
+          name: "",
+          photoURL: "",
+          email: "",
+        };
+        setUser(signedOutUser);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+  const handleBlur = (event) => {
+    console.log(event.target.name, event.target.value);
+    if (event.target.name === "email") {
+      const isEmailValid = /\S+@\S+\.\S+/.test(event.target.value);
+      console.log(isEmailValid);
+    }
+    if (event.target.name === "password") {
+      const isPasswordValid = event.target.value.length > 8;
+      console.log(isPasswordValid);
+    }
+  };
+  //Sign In//
+
+  const handleSubmit = () => {};
   return (
     <div className="App">
       <h1>Welcome, FireBase authentication</h1>
@@ -67,8 +81,29 @@ function App() {
           <h2> Hi,{user.name}</h2>
           <p>{user.email}</p>
           <img src={user.photo} alt="fire-base" />
+          <h1>Authentication Form</h1>
         </div>
       )}
+      <form onSubmit={handleSubmit}>
+        <br />
+        <input
+          type="text"
+          onChange={handleBlur}
+          name="email"
+          placeholder="email-id"
+          required
+        />
+        <br />
+        <input
+          type="password"
+          onChange={handleBlur}
+          name="password"
+          placeholder="password"
+          required
+        />
+        <br />
+        <button>Submit</button>
+      </form>
     </div>
   );
 }
