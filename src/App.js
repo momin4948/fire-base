@@ -3,6 +3,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import firebaseConfig from "./firebase.config";
 import { useState } from "react";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 firebase.initializeApp(firebaseConfig);
 function App() {
@@ -26,6 +27,8 @@ function App() {
           name: displayName,
           email: email,
           photo: photoURL,
+          // error: "",
+          // success: false,
         };
         setUser(signedInUser);
       })
@@ -47,6 +50,8 @@ function App() {
           name: "",
           photoURL: "",
           email: "",
+          error: "",
+          success: false,
         };
         setUser(signedOutUser);
       })
@@ -56,18 +61,45 @@ function App() {
   };
   const handleBlur = (event) => {
     console.log(event.target.name, event.target.value);
+    let isFormValid = true;
     if (event.target.name === "email") {
-      const isEmailValid = /\S+@\S+\.\S+/.test(event.target.value);
-      console.log(isEmailValid);
+      // const isEmailValid = /\S+@\S+\.\S+/.test(event.target.value);
+      isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
     }
     if (event.target.name === "password") {
       const isPasswordValid = event.target.value.length > 8;
       console.log(isPasswordValid);
+      isFormValid = isPasswordValid;
+    }
+    if (isFormValid) {
+      const newUserInfo = { ...user };
+      newUserInfo[event.target.name] = event.target.value;
+      setUser(newUserInfo);
     }
   };
   //Sign In//
 
-  const handleSubmit = () => {};
+  const handleSubmit = (e) => {
+    if (user.email && user.password) {
+      console.log("HI");
+    }
+    e.preventDefault();
+
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, user.email, user.password)
+      .then((res) => {
+        const newUserInfo = { ...user };
+        newUserInfo.error = "";
+        newUserInfo.success = true;
+        setUser(newUserInfo);
+      })
+      .catch((error) => {
+        const newUserInfo = { ...user };
+        newUserInfo.error = error.message;
+        newUserInfo.success = false;
+        setUser(newUserInfo);
+      });
+  };
   return (
     <div className="App">
       <h1>Welcome, FireBase authentication</h1>
@@ -89,6 +121,14 @@ function App() {
         <input
           type="text"
           onChange={handleBlur}
+          name="name"
+          placeholder="name"
+          required
+        />
+        <br />
+        <input
+          type="text"
+          onChange={handleBlur}
           name="email"
           placeholder="email-id"
           required
@@ -102,8 +142,21 @@ function App() {
           required
         />
         <br />
+        <br />
         <button>Submit</button>
+        <p>email : {user.email}</p>
+        <p>password : {user.password}</p>
+        <p>name : {user.name}</p>
       </form>
+      <p style={{ color: "Red", fontSize: "30px" }}>{user.error}</p>
+      {/* <p style={{ color: "red", fontSize: "30px" }}>
+        User Already Registered !
+      </p> */}
+      {user.success && (
+        <p style={{ color: "Green", fontSize: "30px" }}>
+          User Created Successfully
+        </p>
+      )}
     </div>
   );
 }
